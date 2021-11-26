@@ -12,7 +12,7 @@ dotenv.config();
 app.use(cors());
 app.use(json());
 
-app.get("/", (_, res, __) => res.send("Hello! this is the backend for interview creation portal"));
+app.get("/", (_, res, __) => res.send("Hello! this is the backend for interview scheduling portal"));
 app.use(routes);
 
 const MONGO_URI = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@nodejs-project.rr5qv.mongodb.net/${process.env.MONGO_DB_NAME}?retryWrites=true&w=majority`;
