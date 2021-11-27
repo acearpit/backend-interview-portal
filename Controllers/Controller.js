@@ -15,28 +15,47 @@ exports.getParticipantDetails = async (req, res) => {
   res.status(200).json(user);
 };
 
-exports.createInterview = async (req, res) => {
+exports.scheduleInterview = async (req, res) => {
   const interviewData = req.body;
 
-  if (interviewData.participants.length() < 1) res.status(500).json("Atleast 2 participants should be present in the interview!");
+  const st = new Date(interviewData.startTime),
+    et = new Date(interviewData.endTime);
 
+  if (interviewData.participants.length < 1) {
+    res.status(500).json("Atleast 2 participants should be present in the interview!");
+    return;
+  }
+
+  var isValid = true;
   const interviews = await Interview.find();
+
   interviews.forEach((interview) => {
     if (
-      (interview.startTime >= interviewData.startTime && interview.startTime <= interviewData.endTime) ||
-      (interview.endTime >= interviewData.startTime && interview.endTime <= interviewData.endTime) ||
-      (interview.startTime >= interviewData.startTime && interview.endTime <= interviewData.endTime) ||
-      (interview.startTime <= interviewData.startTime && interview.startTime >= interviewData.endTime)
+      (!interviewData._id || interviewData._id !== interview._id) &&
+      ((interview.startTime >= st && interview.startTime <= et) ||
+        (interview.endTime >= st && interview.endTime <= et) ||
+        (interview.startTime >= st && interview.endTime <= et) ||
+        (interview.startTime <= st && interview.endTime >= et))
     ) {
       interviewData.participants.forEach((participant1) => {
-        if (interview.participants.findIndex((participant2) => participant2.userId === participant1.userId) !== -1) res.status(500).json("The interview conflicts with existing interviews!");
+        if (interview.participants.findIndex((participant2) => participant2.userId === participant1.userId) !== -1) isValid = false;
       });
     }
   });
 
-  const interview = await Interview.create(interviewData);
+  if (isValid) {
+    let interview;
 
-  res.status(201).json(interview);
+    if (interviewData._id) {
+      interview = await Interview.findOneAndUpdate({ _id: interviewData._id }, interviewData);
+    } else {
+      interview = await Interview.create(interviewData);
+    }
+
+    res.status(201).json(interview);
+  } else {
+    res.status(500).json("The interview cannot be scheduled as interview timmings conflicts with existing interviews of some participants!");
+  }
 };
 
 exports.getInterviewDetails = async (req, res) => {

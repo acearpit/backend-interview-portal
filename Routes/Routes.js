@@ -10,7 +10,7 @@ router.get("/getParticipantDetails/:id", controller.getParticipantDetails);
 
 router.get("/interviews", controller.getAllInterviews);
 router.get("/interview/:id", controller.getInterviewDetails);
-router.put("/scheduleInterview", controller.createInterview);
-router.put("/deleteInterview/:id", controller.deleteInterview);
+router.put("/scheduleInterview", controller.scheduleInterview);
+router.delete("/deleteInterview/:id", controller.deleteInterview);
 
 module.exports = router;
